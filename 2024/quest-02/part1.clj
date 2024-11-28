@@ -5,6 +5,7 @@
     "AWAKEN THE POWER, ADORNED WITH THE FLAMES BRIGHT IRE"]))
 
 (defn parse-words [input]
+  "WORDS:A,B,C,D -> ['A' 'B' 'C' 'C']"
   (as-> input $
         (str/split $ #"\n")
         (first $)
@@ -14,12 +15,7 @@
         (vec $)))
 
 (defn parse-phrase [input]
-  (as-> input $
-        (str/split $ #"\n")
-        (last $)))
-
-(println (parse-words sample-input))
-(println (parse-phrase sample-input))
+  (last (str/split input #"\n")))
 
 (defn part-1 [input]
   (let [words  (parse-words input)
