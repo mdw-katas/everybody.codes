@@ -1,5 +1,5 @@
 (defn parse-words [input]
-  "WORDS:A,B,C,D -> ['A' 'B' 'C' 'C']"
+  "WORDS:A,B,C,D\n... -> ['A' 'B' 'C' 'D']"
   (as-> input $
         (str/split $ #"\n")
         (first $)
