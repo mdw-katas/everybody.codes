@@ -24,3 +24,47 @@ func TestPart1(t *testing.T) {
 		t.Error("expected 32 runic words, got ", count)
 	}
 }
+
+func TestPart2(t *testing.T) {
+	raw, err := os.ReadFile("notes-2.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	lines := strings.Split(string(raw), "\n")
+	_, joinedRunicWords, _ := strings.Cut(lines[0], ":")
+	runicWords := strings.Split(joinedRunicWords, ",")
+	t.Log(runicWords)
+	count := 0
+	for _, line := range lines[2:] {
+		runic := make(map[int]struct{})
+		for _, word := range runicWords {
+			for n := range len(line) {
+				if n+len(word) > len(line) {
+					continue
+				}
+				if line[n:n+len(word)] == word {
+					for offset := range len(word) {
+						runic[n+offset] = struct{}{}
+					}
+				}
+				if line[n:n+len(word)] == reverse(word) {
+					for offset := range len(word) {
+						runic[n+offset] = struct{}{}
+					}
+				}
+			}
+		}
+		count += len(runic)
+	}
+	if count != 5237 {
+		t.Error("expected 5237 runic symbols, got ", count)
+	}
+}
+
+func reverse(s string) string {
+	var result []rune
+	for i := len(s) - 1; i >= 0; i-- {
+		result = append(result, rune(s[i]))
+	}
+	return string(result)
+}
