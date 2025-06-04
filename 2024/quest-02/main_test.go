@@ -68,3 +68,34 @@ func reverse(s string) string {
 	}
 	return string(result)
 }
+
+func TestPart3(t *testing.T) {
+	raw, err := os.ReadFile("notes-3.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	lines := strings.Split(string(raw), "\n")
+	_, joinedRunicWords, _ := strings.Cut(lines[0], ":")
+	runicWords := strings.Split(joinedRunicWords, ",")
+	t.Log(runicWords)
+	rows := lines[2:]
+	t.Log(len(rows))
+}
+
+type StringLoop struct {
+	haystack string
+	reversed string
+	marked   []int
+}
+
+func NewStringLoop(s string) *StringLoop {
+	return &StringLoop{
+		haystack: s + s,
+		reversed: reverse(s + s),
+		marked:   make([]int, len(s)),
+	}
+}
+
+func (this *StringLoop) Find(needle string) {
+	// TODO
+}
