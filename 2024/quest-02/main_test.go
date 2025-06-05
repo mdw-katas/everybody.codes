@@ -77,25 +77,101 @@ func TestPart3(t *testing.T) {
 	lines := strings.Split(string(raw), "\n")
 	_, joinedRunicWords, _ := strings.Cut(lines[0], ":")
 	runicWords := strings.Split(joinedRunicWords, ",")
-	t.Log(runicWords)
 	rows := lines[2:]
-	t.Log(len(rows))
-}
-
-type StringLoop struct {
-	haystack string
-	reversed string
-	marked   []int
-}
-
-func NewStringLoop(s string) *StringLoop {
-	return &StringLoop{
-		haystack: s + s,
-		reversed: reverse(s + s),
-		marked:   make([]int, len(s)),
+	left2right := make([]*Loop, len(rows))
+	right2left := make([]*Loop, len(rows))
+	ups := make([]*Vertical, len(rows[0]))
+	downs := make([]*Vertical, len(rows[0]))
+	var all []*Char
+	for r, row := range rows {
+		left2right[r] = &Loop{}
+		right2left[r] = &Loop{}
+		for c, char := range row {
+			v := &Char{Row: r, Col: c, Rune: char}
+			all = append(all, v)
+			if r == 0 {
+				ups[c] = &Vertical{}
+				downs[c] = &Vertical{}
+			}
+			left2right[r].chars = append(left2right[r].chars, v)
+			right2left[r].chars = append([]*Char{v}, right2left[r].chars...) // reverse order
+			ups[c].chars = append(ups[c].chars, v)
+			downs[c].chars = append([]*Char{v}, downs[c].chars...) // reverse order
+		}
+	}
+	for _, word := range runicWords {
+		for _, loop := range left2right {
+			loop.Find(word)
+		}
+		for _, loop := range right2left {
+			loop.Find(word)
+		}
+		for _, column := range ups {
+			column.Find(word)
+		}
+		for _, column := range downs {
+			column.Find(word)
+		}
+	}
+	count := 0
+	for _, c := range all {
+		if c.Runic {
+			count++
+		}
+	}
+	if count != 11967 {
+		t.Error("expected 11967 runic symbols, got ", count)
 	}
 }
 
-func (this *StringLoop) Find(needle string) {
-	// TODO
+type Char struct {
+	Row   int
+	Col   int
+	Rune  rune
+	Runic bool
+}
+
+type Loop struct {
+	chars []*Char
+}
+
+func (this *Loop) Find(word string) {
+	s := this.String()
+	s = s + s // double the string to account for wrap-around
+	for c := range len(s)/2 + 1 {
+		if s[c:c+len(word)] == word {
+			for cc := c; cc < c+len(word); cc++ {
+				this.chars[cc%len(this.chars)].Runic = true
+			}
+		}
+	}
+}
+func (this *Loop) String() string {
+	return String(this.chars)
+}
+
+type Vertical struct {
+	chars []*Char
+}
+
+func (this *Vertical) Find(word string) {
+	s := this.String()
+	for c := range len(s) - len(word) + 1 {
+		if s[c:c+len(word)] == word {
+			for cc := c; cc < c+len(word); cc++ {
+				this.chars[cc].Runic = true
+			}
+		}
+	}
+}
+func (this *Vertical) String() string {
+	return String(this.chars)
+}
+
+func String(chars []*Char) string {
+	result := ""
+	for _, char := range chars {
+		result += string(char.Rune)
+	}
+	return result
 }
