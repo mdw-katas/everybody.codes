@@ -16,14 +16,14 @@ func assertEqual(t *testing.T, a, b any) {
 }
 
 func TestPart1(t *testing.T) {
-	assertEqual(t, 35, Mine("part1-sample.txt"))
-	assertEqual(t, 117, Mine("part1-full.txt"))
+	assertEqual(t, 35, Mine("part1-sample.txt", neighbors4))
+	assertEqual(t, 117, Mine("part1-full.txt", neighbors4))
 }
 func TestPart2(t *testing.T) {
-	assertEqual(t, 2701, Mine("part2-full.txt"))
+	assertEqual(t, 2701, Mine("part2-full.txt", neighbors4))
 }
 
-func Mine(filename string) int {
+func Mine(filename string, neighbors Neighbors) int {
 	input, err := os.ReadFile(filename)
 	if err != nil {
 		panic(err)
@@ -32,7 +32,7 @@ func Mine(filename string) int {
 	points := Scan(string(input))
 	for {
 		total += len(points)
-		points = Dig(points)
+		points = Dig(points, neighbors)
 		if len(points) == 0 {
 			break
 		}
@@ -40,22 +40,23 @@ func Mine(filename string) int {
 	return total
 }
 
-func Dig(points map[Point]struct{}) (result map[Point]struct{}) {
-	result = make(map[Point]struct{})
+func Dig(points Field, neighbors Neighbors) (result Field) {
+	result = make(Field)
 	for point := range points {
-		if neighbors(point, points) == 4 {
+		expected, actual := neighbors(point, points)
+		if actual == expected {
 			result[point] = struct{}{}
 		}
 	}
 	return result
 }
 
-func neighbors(point Point, points map[Point]struct{}) (count int) {
-	_, left := points[Point{Row: point.Row, Col: point.Col - 1}]
-	_, right := points[Point{Row: point.Row, Col: point.Col + 1}]
-	_, above := points[Point{Row: point.Row - 1, Col: point.Col}]
-	_, below := points[Point{Row: point.Row + 1, Col: point.Col}]
-	return bool2int(left, right, above, below)
+func neighbors4(point Point, field Field) (expected, actual int) {
+	_, left := field[Point{Row: point.Row, Col: point.Col - 1}]
+	_, right := field[Point{Row: point.Row, Col: point.Col + 1}]
+	_, above := field[Point{Row: point.Row - 1, Col: point.Col}]
+	_, below := field[Point{Row: point.Row + 1, Col: point.Col}]
+	return 4, bool2int(left, right, above, below)
 }
 func bool2int(bools ...bool) (result int) {
 	for _, b := range bools {
@@ -65,11 +66,15 @@ func bool2int(bools ...bool) (result int) {
 	}
 	return result
 }
+func contains(field Field, point Point) bool {
+	_, ok := field[point]
+	return ok
+}
 
 type Point struct{ Row, Col int }
 
-func Scan(input string) (result map[Point]struct{}) {
-	result = make(map[Point]struct{})
+func Scan(input string) (result Field) {
+	result = make(Field)
 	scanner := bufio.NewScanner(strings.NewReader(input))
 	for row := 0; scanner.Scan(); row++ {
 		line := scanner.Text()
@@ -81,3 +86,6 @@ func Scan(input string) (result map[Point]struct{}) {
 	}
 	return result
 }
+
+type Neighbors func(Point, Field) (expected, actual int)
+type Field map[Point]struct{}
