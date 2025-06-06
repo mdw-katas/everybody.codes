@@ -22,6 +22,10 @@ func TestPart1(t *testing.T) {
 func TestPart2(t *testing.T) {
 	assertEqual(t, 2701, Mine("part2-full.txt", neighbors4))
 }
+func TestPart3(t *testing.T) {
+	assertEqual(t, 29, Mine("part1-sample.txt", neighbors8))
+	assertEqual(t, 2005, Mine("part3-full.txt", neighbors8))
+}
 
 func Mine(filename string, neighbors Neighbors) int {
 	input, err := os.ReadFile(filename)
@@ -51,6 +55,16 @@ func Dig(points Field, neighbors Neighbors) (result Field) {
 	return result
 }
 
+func neighbors8(point Point, field Field) (expected, actual int) {
+	var (
+		upperLeft  = contains(field, Point{Row: point.Row - 1, Col: point.Col - 1})
+		upperRight = contains(field, Point{Row: point.Row - 1, Col: point.Col + 1})
+		lowerLeft  = contains(field, Point{Row: point.Row + 1, Col: point.Col - 1})
+		lowerRight = contains(field, Point{Row: point.Row + 1, Col: point.Col + 1})
+	)
+	expected, actual = neighbors4(point, field)
+	return expected + 4, actual + bool2int(upperLeft, upperRight, lowerLeft, lowerRight)
+}
 func neighbors4(point Point, field Field) (expected, actual int) {
 	_, left := field[Point{Row: point.Row, Col: point.Col - 1}]
 	_, right := field[Point{Row: point.Row, Col: point.Col + 1}]
