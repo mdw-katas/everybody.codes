@@ -14,14 +14,14 @@ func assertEqual(t *testing.T, a, b any) {
 }
 
 func TestPart1(t *testing.T) {
-	assertEqual(t, 35, Mine(t, "part1-sample.txt"))
-	assertEqual(t, 117, Mine(t, "part1-full.txt"))
+	assertEqual(t, 35, Mine("part1-sample.txt"))
+	assertEqual(t, 117, Mine("part1-full.txt"))
 }
 
-func Mine(t *testing.T, filename string) int {
+func Mine(filename string) int {
 	input, err := os.ReadFile(filename)
 	if err != nil {
-		t.Fatal(err)
+		panic(err)
 	}
 	total := 0
 	points := Scan(string(input))
@@ -50,19 +50,15 @@ func neighbors(point Point, points map[Point]struct{}) (count int) {
 	_, right := points[Point{Row: point.Row, Col: point.Col + 1}]
 	_, above := points[Point{Row: point.Row - 1, Col: point.Col}]
 	_, below := points[Point{Row: point.Row + 1, Col: point.Col}]
-	if left {
-		count++
+	return bool2int(left, right, above, below)
+}
+func bool2int(bools ...bool) (result int) {
+	for _, b := range bools {
+		if b {
+			result++
+		}
 	}
-	if right {
-		count++
-	}
-	if above {
-		count++
-	}
-	if below {
-		count++
-	}
-	return count
+	return result
 }
 
 type Point struct{ Row, Col int }
