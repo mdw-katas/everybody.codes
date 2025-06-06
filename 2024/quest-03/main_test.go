@@ -9,7 +9,7 @@ import (
 
 func assertEqual(t *testing.T, a, b any) {
 	if a != b {
-		t.Fatalf("%s != %s", a, b)
+		t.Fatalf("%v != %v", a, b)
 	}
 	t.Helper()
 	t.Log(b)
@@ -18,6 +18,9 @@ func assertEqual(t *testing.T, a, b any) {
 func TestPart1(t *testing.T) {
 	assertEqual(t, 35, Mine("part1-sample.txt"))
 	assertEqual(t, 117, Mine("part1-full.txt"))
+}
+func TestPart2(t *testing.T) {
+	assertEqual(t, 2701, Mine("part2-full.txt"))
 }
 
 func Mine(filename string) int {
