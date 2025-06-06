@@ -11,6 +11,8 @@ func assertEqual(t *testing.T, a, b any) {
 	if a != b {
 		t.Fatalf("%s != %s", a, b)
 	}
+	t.Helper()
+	t.Log(b)
 }
 
 func TestPart1(t *testing.T) {
