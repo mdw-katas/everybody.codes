@@ -17,13 +17,13 @@ func parseInt(s string) int {
 	return must.Value(strconv.Atoi(s))
 }
 
-func TestPart1Sample(t *testing.T) {
+func TestPart1(t *testing.T) {
 	testPart1(t, "part1-sample.txt", 2323)
 	testPart1(t, "part1-full.txt", 4422)
 }
 func testPart1(t *testing.T, inputFile string, expected int) {
 	t.Run(inputFile, func(t *testing.T) {
-		var field = parseField(inputFile)
+		field := parseField(inputFile)
 		result := 0
 		for round := range 10 {
 			result = field.performRound(round)
@@ -34,6 +34,25 @@ func testPart1(t *testing.T, inputFile string, expected int) {
 			//)
 		}
 		should.So(t, result, should.Equal, expected)
+	})
+}
+
+func TestPart2(t *testing.T) {
+	testPart2(t, "part2-sample.txt", 50877075)
+	testPart2(t, "part2-full.txt", 11545588932220)
+}
+func testPart2(t *testing.T, inputFile string, expected int) {
+	t.Run(inputFile, func(t *testing.T) {
+		field := parseField(inputFile)
+		results := map[int]int{}
+		for x := 0; ; x++ {
+			result := field.performRound(x)
+			results[result]++
+			if results[result] == 2024 {
+				should.So(t, result*(x+1), should.Equal, expected)
+				break
+			}
+		}
 	})
 }
 
