@@ -56,6 +56,25 @@ func testPart2(t *testing.T, inputFile string, expected int) {
 	})
 }
 
+func TestPart3(t *testing.T) {
+	testPart3(t, "part3-sample.txt", 6584)
+	testPart3(t, "part3-full.txt", 8312100610051003)
+}
+func testPart3(t *testing.T, inputFile string, expected int) {
+	t.Run(inputFile, func(t *testing.T) {
+		field := parseField(inputFile)
+		maxResult := 0
+		for x := 0; x < 10_000; x++ {
+			result := field.performRound(x)
+			if result > maxResult {
+				maxResult = result
+				t.Log(x, maxResult)
+			}
+		}
+		should.So(t, maxResult, should.Equal, expected)
+	})
+}
+
 type Field struct {
 	columns []*List[int]
 }
