@@ -7,80 +7,111 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+
+	"github.com/mdw-go/must"
+	"github.com/mdw-go/printing"
+	"github.com/mdw-go/testing/should"
 )
 
-func assertEqual(t *testing.T, a, b any) {
-	if a != b {
-		t.Helper()
-		t.Errorf("%v != %v", a, b)
-	}
-}
 func parseInt(s string) int {
-	i, err := strconv.Atoi(s)
-	if err != nil {
-		panic(err)
-	}
-	return i
+	return must.Value(strconv.Atoi(s))
 }
 
-func TestPart1(t *testing.T) {
-	var columns = parseRows("part1-sample.txt")
-	for _, column := range columns {
-		t.Log(column.values)
-	}
-	for round := range 10 {
-		t.Log(performRound(round, columns))
-	}
+func TestPart1Sample(t *testing.T) {
+	testPart1(t, "part1-sample.txt", 2323)
+	testPart1(t, "part1-full.txt", 4422)
 }
-func parseRows(filename string) (result []*List[int]) {
-	file, err := os.Open(filename)
-	if err != nil {
-		panic(err)
-	}
-	defer func() { _ = file.Close() }()
+func testPart1(t *testing.T, inputFile string, expected int) {
+	t.Run(inputFile, func(t *testing.T) {
+		var field = parseField(inputFile)
+		result := 0
+		for round := range 10 {
+			result = field.performRound(round)
+			//t.Logf("Round: %d\nResult: %d\nField:\n%s",
+			//	round+1,
+			//	result,
+			//	field.String(),
+			//)
+		}
+		should.So(t, result, should.Equal, expected)
+	})
+}
+
+type Field struct {
+	columns []*List[int]
+}
+
+func parseField(filename string) (result *Field) {
+	result = &Field{}
+	file := must.Value(os.Open(filename))
+	defer must.Defer(file.Close)()
 	scanner := bufio.NewScanner(file)
 	for scanned := 0; scanner.Scan(); scanned++ {
 		line := scanner.Text()
-		for field := range strings.FieldsSeq(line) {
+		for f, field := range strings.Fields(line) {
 			if scanned == 0 {
 				column := NewList[int]()
-				result = append(result, column)
+				result.columns = append(result.columns, column)
 			}
-			result[scanned].Append(parseInt(field))
+			result.columns[f].Append(parseInt(field))
 		}
 	}
 	return result
 }
-func performRound(roundCounter int, columns []*List[int]) int {
+
+func (this *Field) String() string {
+	builder := printing.NewBuilder()
+	for x := 0; ; x++ {
+		finished := true
+		for _, column := range this.columns {
+			if x < len(column.values) {
+				builder.Print(column.values[x])
+				builder.Print(" ")
+				finished = false
+			} else {
+				builder.Print("-")
+				builder.Print(" ")
+			}
+		}
+		builder.Println()
+		if finished {
+			return builder.Inner().String()
+		}
+	}
+}
+func (this *Field) performRound(roundCounter int) int {
+	columns := this.columns
 	from := roundCounter % len(columns)
 	clapper := columns[from].Pop(0)
 	to := (from + 1) % len(columns)
-	Clap(clapper, clapper, columns[to])
-	var builder strings.Builder
+	Clap(clapper, 0, -1, 1, columns[to])
+	builder := printing.NewBuilder()
 	for _, column := range columns {
-		builder.WriteString(strconv.Itoa(column.Nth(0)))
+		builder.Printf("%d", column.Nth(0))
 	}
-	return parseInt(builder.String())
+	return parseInt(builder.Inner().String())
 }
-func Clap(clapper, claps int, column *List[int]) {
-	cursor := 0
-	for cursor < column.Len() && claps >= 0 {
-		cursor, claps = cursor+1, claps-1
-	}
-	if claps == 0 { // on left side, insert 'in-front' or before
-		column.Insert(cursor, clapper)
+func Clap(clapper, claps, at, direction int, column *List[int]) {
+	if clapper == claps {
+		if direction == 1 {
+			column.Insert(at, clapper)
+		} else {
+			column.Insert(at+1, clapper)
+		}
 		return
 	}
-	for cursor >= 0 && claps >= 0 {
-		cursor, claps = cursor-1, claps-1
+	if claps < clapper {
+		claps++
+		at += direction
 	}
-	if claps == 0 { // on right side, insert 'behind' or after
-		column.Insert(cursor+1, clapper)
-		return
+	if at >= column.Len() {
+		at--
+		direction *= -1
+	} else if at < 0 {
+		at++
+		direction *= -1
 	}
-	if claps > 0 {
-		Clap(clapper, claps, column)
-	}
+	Clap(clapper, claps, at, direction, column)
 }
 
 type List[T any] struct{ values []T }
