@@ -9,13 +9,32 @@ import (
 
 	"github.com/mdw-go/must"
 	"github.com/mdw-go/must/osmust"
+	"github.com/mdw-go/testing/should"
 )
 
-func TestPart1(t *testing.T) {
-	t.Log(FullPath(FindPathWithUniqueLength(YieldPaths(ParseTreeFile("part1-sample.txt")))))
-	t.Log(FullPath(FindPathWithUniqueLength(YieldPaths(ParseTreeFile("part1-actual.txt")))))
+func Test(t *testing.T) {
+	should.So(t, Part1("part1-sample.txt"), should.Equal, "RRB@")
+	should.So(t, Part1("part1-actual.txt"), should.Equal, "RRFKZKDPSNDH@")
+	should.So(t, Part2("part2-actual.txt"), should.Equal, "RGPHQFVKNB@")
+}
 
-	t.Log(FirstLettersOnly(FindPathWithUniqueLength(YieldPaths(ParseTreeFile("part2-actual.txt")))))
+func Part2(filepath string) string {
+	var (
+		tree   = ParseTreeFile(filepath)
+		paths  = YieldPaths(tree)
+		unique = FindPathWithUniqueLength(paths)
+		result = FirstLettersOnly(unique)
+	)
+	return result
+}
+func Part1(filepath string) string {
+	var (
+		tree   = ParseTreeFile(filepath)
+		paths  = YieldPaths(tree)
+		unique = FindPathWithUniqueLength(paths)
+		result = FullPath(unique)
+	)
+	return result
 }
 
 func FullPath(path string) string {
@@ -27,7 +46,6 @@ func FirstLettersOnly(path string) (result string) {
 	}
 	return result
 }
-
 func FindPathWithUniqueLength(paths iter.Seq[string]) (result string) {
 	lengths := make(map[int][]string)
 	for path := range paths {
