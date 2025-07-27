@@ -12,8 +12,20 @@ import (
 )
 
 func TestPart1(t *testing.T) {
-	t.Log(FindPathWithUniqueLength(YieldPaths(ParseTreeFile("part1-sample.txt"))))
-	t.Log(FindPathWithUniqueLength(YieldPaths(ParseTreeFile("part1-actual.txt"))))
+	t.Log(FullPath(FindPathWithUniqueLength(YieldPaths(ParseTreeFile("part1-sample.txt")))))
+	t.Log(FullPath(FindPathWithUniqueLength(YieldPaths(ParseTreeFile("part1-actual.txt")))))
+
+	t.Log(FirstLettersOnly(FindPathWithUniqueLength(YieldPaths(ParseTreeFile("part2-actual.txt")))))
+}
+
+func FullPath(path string) string {
+	return strings.ReplaceAll(path, "|", "")
+}
+func FirstLettersOnly(path string) (result string) {
+	for element := range strings.SplitSeq(path, "|") {
+		result += string(element[0])
+	}
+	return result
 }
 
 func FindPathWithUniqueLength(paths iter.Seq[string]) (result string) {
@@ -45,7 +57,7 @@ func Traverse(closer *sync.Once, yield chan string, tree map[string][]string, pa
 		closer.Do(func() { close(yield) })
 		return
 	}
-	longerPath := path + node
+	longerPath := strings.TrimPrefix(path+"|"+node, "|")
 	if node == "@" {
 		yield <- longerPath
 		return
