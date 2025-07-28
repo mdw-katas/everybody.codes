@@ -13,11 +13,27 @@ import (
 )
 
 func Test(t *testing.T) {
-	should.So(t, Part1("part1-sample.txt"), should.Equal, "RRB@")
-	should.So(t, Part1("part1-actual.txt"), should.Equal, "RRFKZKDPSNDH@")
-	should.So(t, Part2("part2-actual.txt"), should.Equal, "RGPHQFVKNB@")
+	t.Run("part1", func(t *testing.T) {
+		should.So(t, Part1("part1-sample.txt"), should.Equal, "RRB@")
+		should.So(t, Part1("part1-actual.txt"), should.Equal, "RRFKZKDPSNDH@")
+	})
+	t.Run("part2", func(t *testing.T) {
+		should.So(t, Part2("part2-actual.txt"), should.Equal, "RGPHQFVKNB@")
+	})
+	t.Run("part3", func(t *testing.T) {
+		should.So(t, Part3("part3-actual.txt"), should.Equal, "RVQTQFTPWXDP@")
+	})
 }
 
+func Part1(filepath string) string {
+	var (
+		tree   = ParseTreeFile(filepath)
+		paths  = YieldPaths(tree)
+		unique = FindPathWithUniqueLength(paths)
+		result = FullPath(unique)
+	)
+	return result
+}
 func Part2(filepath string) string {
 	var (
 		tree   = ParseTreeFile(filepath)
@@ -27,12 +43,13 @@ func Part2(filepath string) string {
 	)
 	return result
 }
-func Part1(filepath string) string {
+func Part3(filepath string) string {
 	var (
-		tree   = ParseTreeFile(filepath)
-		paths  = YieldPaths(tree)
-		unique = FindPathWithUniqueLength(paths)
-		result = FullPath(unique)
+		tree       = ParseTreeFile(filepath)
+		paths      = YieldPaths(tree)
+		happyPaths = RemoveInfestedPaths(paths)
+		unique     = FindPathWithUniqueLength(happyPaths)
+		result     = FirstLettersOnly(unique)
 	)
 	return result
 }
@@ -45,6 +62,24 @@ func FirstLettersOnly(path string) (result string) {
 		result += string(element[0])
 	}
 	return result
+}
+func RemoveInfestedPaths(paths iter.Seq[string]) iter.Seq[string] {
+	return func(yield func(string) bool) {
+		for path := range paths {
+			infested := false
+			for element := range strings.SplitSeq(path, "|") {
+				if element == "BUG" || element == "ANT" {
+					infested = true
+				}
+			}
+			if infested {
+				continue
+			}
+			if !yield(path) {
+				return
+			}
+		}
+	}
 }
 func FindPathWithUniqueLength(paths iter.Seq[string]) (result string) {
 	lengths := make(map[int][]string)
