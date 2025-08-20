@@ -1,2 +1,4 @@
+github.com/mdw-go/generic-list v0.1.0 h1:/udCrabdJfq1ygcCVNh10Dd0WTtNAfCBMVeeQ3mUFe8=
+github.com/mdw-go/generic-list v0.1.0/go.mod h1:IjjyK80xVT+uu6sY0lHv1YLj6GDM18hH2i9xpMCf4PA=
 github.com/mdw-go/testing/v2 v2.0.0 h1:gxhmYzZL3jeeTgBFjqYtXwp5nuk2hoZbNZ9PBgPzYzg=
 github.com/mdw-go/testing/v2 v2.0.0/go.mod h1:5fm8B/ncNxEyKICkVoHt/ujcKREH6Y6Wg1QIkL+5vAE=
